@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks Conference</title>
+    <style>
+        /* Basic Reset & Defaults */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Main Content Area */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Search/Filter */
+        .filter-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .filter-container label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #0056b3;
+        }
+        .filter-input {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1;
+            max-width: 300px;
+            font-size: 1em;
+        }
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .category-tag {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .category-tag:hover {
+            background-color: #adb5bd;
+            color: white;
+        }
+        .category-tag.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Schedule */
+        .schedule-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .schedule-container h2 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 25px;
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            background-color: #fff;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        .schedule-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .schedule-item .time {
+            font-weight: bold;
+            color: #007bff;
+            min-width: 120px; /* Consistent width for time */
+            margin-right: 20px;
+            font-size: 1.1em;
+        }
+        .schedule-item .event-title {
+            font-weight: 500;
+            font-size: 1.05em;
+            flex-grow: 1;
+            color: #0056b3; /* Slightly darker blue for event titles */
+        }
+        .schedule-item.lunch .event-title {
+            color: #28a745; /* Green for lunch */
+        }
+        .schedule-item.transition .event-title {
+            font-style: italic;
+            color: #6c757d; /* Gray for transitions */
+            font-size: 0.95em;
+        }
+
+        /* Talk Details Modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            backdrop-filter: blur(5px); /* Blur background */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%; /* Could be more responsive */
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            animation: fadeIn 0.4s;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .modal-close-button:hover,
+        .modal-close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 1.8em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-content .speaker, .modal-content .categories, .modal-content .description {
+            margin-bottom: 15px;
+        }
+        .modal-content .speaker strong, .modal-content .categories strong, .modal-content .description strong {
+            color: #0056b3;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        .modal-content .speaker ul, .modal-content .categories ul {
+            list-style: disc;
+            padding-left: 25px;
+            margin: 0;
+        }
+        .modal-content .speaker ul li, .modal-content .categories ul li {
+            margin-bottom: 5px;
+        }
+        .modal-content .categories ul {
+            list-style: none;
+            padding-left: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .modal-content .categories ul li {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: auto; /* Pushes footer to the bottom */
+            font-size: 0.9em;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filter-input {
+                width: 100%;
+                max-width: none;
+            }
+            .schedule-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .schedule-item .time {
+                min-width: auto;
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Tech Talks Conference</h1>
+        <p>A 1-Day Event on Emerging Technologies - March 9, 2026</p>
+    </header>
+
+    <main>
+        <div class="filter-container">
+            <label for="search-input">Filter by Category:</label>
+            <input type="text" id="search-input" class="filter-input" placeholder="Type a category...">
+            <div id="category-tags" class="category-tags">
+                <!-- Category tags will be dynamically generated here -->
+            </div>
+        </div>
+
+        <div class="schedule-container">
+            <h2>Today's Schedule</h2>
+            <div id="schedule-list">
+                <!-- Schedule items will be dynamically generated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Talk Details Modal -->
+    <div id="talkDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-button">&times;</span>
+            <h3 id="modal-title"></h3>
+            <div class="speaker">
+                <strong>Speaker(s):</strong>
+                <ul id="modal-speakers"></ul>
+            </div>
+            <div class="categories">
+                <strong>Categories:</strong>
+                <ul id="modal-categories"></ul>
+            </div>
+            <div class="description">
+                <strong>Description:</strong>
+                <p id="modal-description"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        &copy; 2026 Tech Talks Conference. All rights reserved.
+    </footer>
+
+    <script>
+        // Placeholder Data
+        const talksData = [
+            {
+                title: "Intro to Modern Web Frameworks",
+                speakers: ["Alice Smith"],
+                categories: ["WebDev", "Frontend", "JavaScript"],
+                description: "A deep dive into the latest in web frontend frameworks, covering popular choices and their advantages for modern web development."
+            },
+            {
+                title: "Cloud Native Architecture Patterns",
+                speakers: ["Bob Johnson", "Charlie Brown"],
+                categories: ["Cloud", "Architecture", "DevOps"],
+                description: "Exploring best practices for building scalable, resilient, and observable cloud-native applications using microservices and containerization."
+            },
+            {
+                title: "The Future of AI and Machine Learning",
+                speakers: ["Diana Prince"],
+                categories: ["AI", "ML", "DataScience"],
+                description: "An outlook on the rapid advancements, ethical considerations, and potential societal impacts of Artificial Intelligence and Machine Learning."
+            },
+            {
+                title: "Secure Coding Practices",
+                speakers: ["Eve Adams"],
+                categories: ["Security", "WebDev", "Backend"],
+                description: "Learn essential techniques to write secure code, prevent common vulnerabilities, and protect your applications from threats."
+            },
+            {
+                title: "Data Pipelines for Big Data",
+                speakers: ["Frank Green", "Grace Hopper"],
+                categories: ["Data", "BigData", "Cloud", "ETL"],
+                description: "Building efficient, scalable, and reliable data pipelines for processing and analyzing large volumes of data."
+            },
+            {
+                title: "Advanced DevOps Strategies",
+                speakers: ["Heidi Klum"],
+                categories: ["DevOps", "Cloud", "Automation", "CI/CD"],
+                description: "Strategies and tools for optimizing your DevOps workflows, from continuous integration and delivery to infrastructure as code."
+            }
+        ];
+
+        // Event Timings
+        const eventStartTime = "10:00"; // HH:MM
+        const talkDurationMinutes = 60;
+        const transitionMinutes = 10;
+        const lunchDurationMinutes = 60;
+
+        // --- Helper Functions ---
+
+        // Function to add minutes to a time string (HH:MM)
+        function addMinutes(timeStr, minutesToAdd) {
+            const [hours, mins] = timeStr.split(':').map(Number);
+            const totalMinutes = hours * 60 + mins + minutesToAdd;
+            const newHours = Math.floor(totalMinutes / 60) % 24;
+            const newMins = totalMinutes % 60;
+            return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
+        }
+
+        // Function to format time for display (e.g., 10:00 AM)
+        function formatTime(timeStr) {
+            const [hours, mins] = timeStr.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12; // Convert 0 to 12 for midnight/noon
+            return `${displayHours}:${String(mins).padStart(2, '0')} ${period}`;
+        }
+
+        // Function to render talk details in modal
+        function showTalkDetails(talk) {
+            document.getElementById('modal-title').textContent = talk.title;
+            const speakersList = document.getElementById('modal-speakers');
+            speakersList.innerHTML = '';
+            talk.speakers.forEach(speaker => {
+                const li = document.createElement('li');
+                li.textContent = speaker;
+                speakersList.appendChild(li);
+            });
+
+            const categoriesList = document.getElementById('modal-categories');
+            categoriesList.innerHTML = '';
+            talk.categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category;
+                categoriesList.appendChild(li);
+            });
+
+            document.getElementById('modal-description').textContent = talk.description;
+            document.getElementById('talkDetailModal').style.display = "block";
+        }
+
+        // --- Main Rendering and Logic ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const scheduleList = document.getElementById('schedule-list');
+            const categoryTagsContainer = document.getElementById('category-tags');
+            const searchInput = document.getElementById('search-input');
+            const modal = document.getElementById('talkDetailModal');
+            const modalCloseButton = document.querySelector('.modal-close-button');
+
+            let allCategories = new Set();
+            let activeFilters = new Set();
+            let currentScheduleData = []; // To store schedule items for filtering
+
+            // --- Populate Schedule Data ---
+            let currentTime = eventStartTime;
+            let talkIndex = 0;
+
+            // Add intro/welcome if needed (optional, for now just start with first talk)
+
+            // Talks
+            for (let i = 0; i < talksData.length; i++) {
+                const talk = talksData[i];
+                allCategories = new Set([...allCategories, ...talk.categories]); // Collect all unique categories
+
+                const talkStartTime = currentTime;
+                currentTime = addMinutes(currentTime, talkDurationMinutes);
+                const talkEndTime = currentTime;
+
+                currentScheduleData.push({
+                    type: 'talk',
+                    time: `${formatTime(talkStartTime)} - ${formatTime(talkEndTime)}`,
+                    title: talk.title,
+                    data: talk // Store the full talk object for modal display
+                });
+
+                // Add transition if not the last talk
+                if (i < talksData.length - 1) {
+                    currentTime = addMinutes(currentTime, transitionMinutes);
+                    const transitionEndTime = currentTime;
+                    currentScheduleData.push({
+                        type: 'transition',
+                        time: `${formatTime(talkStartTime)} - ${formatTime(transitionEndTime)}`, // Transition time adjusted
+                        title: 'Transition / Break',
+                        data: null
+                    });
+                }
+            }
+
+            // Add Lunch Break
+            currentTime = addMinutes(currentTime, lunchDurationMinutes);
+            const lunchEndTime = currentTime;
+            currentScheduleData.push({
+                type: 'lunch',
+                time: `${formatTime(addMinutes(talkEndTime, transitionMinutes))} - ${formatTime(addMinutes(addMinutes(talkEndTime, transitionMinutes), lunchDurationMinutes))}`, // Calculate lunch start/end based on last talk + transition
+                title: 'Lunch Break',
+                data: null
+            });
+            // Re-calculate current time after lunch to continue schedule
+            let timeAfterLunch = addMinutes(addMinutes(talkEndTime, transitionMinutes), lunchDurationMinutes);
+            // Correcting the current time to be after lunch for any potential following items
+            currentTime = timeAfterLunch;
+
+
+            // Render Schedule Items
+            function renderSchedule(filteredScheduleData) {
+                scheduleList.innerHTML = ''; // Clear previous items
+                filteredScheduleData.forEach(item => {
+                    const scheduleItem = document.createElement('div');
+                    scheduleItem.classList.add('schedule-item');
+                    if (item.type === 'lunch') {
+                        scheduleItem.classList.add('lunch');
+                    } else if (item.type === 'transition') {
+                        scheduleItem.classList.add('transition');
+                    }
+
+                    scheduleItem.innerHTML = `
+                        <div class="time">${item.time}</div>
+                        <div class="event-title">${item.title}</div>
+                    `;
+
+                    if (item.type === 'talk' && item.data) {
+                        scheduleItem.addEventListener('click', () => showTalkDetails(item.data));
+                    }
+                    scheduleList.appendChild(scheduleItem);
+                });
+            }
+
+            // --- Filter Logic ---
+            function updateFilters() {
+                categoryTagsContainer.innerHTML = ''; // Clear existing tags
+                const sortedCategories = Array.from(allCategories).sort();
+                sortedCategories.forEach(category => {
+                    const tag = document.createElement('span');
+                    tag.classList.add('category-tag');
+                    tag.textContent = category;
+                    if (activeFilters.has(category)) {
+                        tag.classList.add('active');
+                    }
+                    tag.addEventListener('click', () => {
+                        if (activeFilters.has(category)) {
+                            activeFilters.delete(category);
+                        } else {
+                            activeFilters.add(category);
+                        }
+                        updateFilters(); // Re-render tags to show active state
+                        filterTalks();
+                    });
+                    categoryTagsContainer.appendChild(tag);
+                });
+            }
+
+            function filterTalks() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let filteredSchedule = currentScheduleData.filter(item => {
+                    if (item.type !== 'talk') return true; // Keep non-talk items (lunch, transitions)
+
+                    // Filter by search input
+                    const matchesSearch = item.data.title.toLowerCase().includes(searchTerm) ||
+                                        item.data.description.toLowerCase().includes(searchTerm) ||
+                                        item.data.speakers.some(speaker => speaker.toLowerCase().includes(searchTerm));
+                    if (!matchesSearch) return false;
+
+                    // Filter by active category tags
+                    if (activeFilters.size === 0) return true; // No category filter active, show all matching search
+                    return item.data.categories.some(category => activeFilters.has(category));
+                });
+                renderSchedule(filteredSchedule);
+            }
+
+            // --- Event Listeners ---
+            searchInput.addEventListener('input', filterTalks);
+            modalCloseButton.addEventListener('click', () => modal.style.display = "none");
+
+            // Close modal if clicking outside of content
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
+            // --- Initial Render ---
+            updateFilters(); // Render category tags
+            renderSchedule(currentScheduleData); // Render all schedule items initially
+        });
+    </script>
+
+</body>
+</html>
